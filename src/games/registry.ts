@@ -4,7 +4,7 @@ import { IGameDefinition } from '../platform/types';
 export interface GameMetadata {
   id: string;
   name: string;
-  subtitle: string;
+  subtitle?: string;
   description: string;
   status: 'playable' | 'in-development' | 'planned';
   definition?: IGameDefinition<any, any>;

@@ -52,10 +52,7 @@ export class LobbyView {
     return `
       <div class="game-card ${game.status}">
         <div class="card-header">
-          <div>
-            <h2 class="card-title">${game.name}</h2>
-            <div class="card-subtitle">${game.subtitle}</div>
-          </div>
+          <h2 class="card-title">${game.name}</h2>
           ${statusBadge}
         </div>
         <p class="card-desc">${game.description}</p>
