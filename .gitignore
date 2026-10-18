@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+android/app/build/
+android/.gradle/
+
+# IDE & OS
+.DS_Store
+*.local
+.vscode/
+.idea/
