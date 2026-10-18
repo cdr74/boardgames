@@ -191,8 +191,22 @@ export class GameSession {
           this.stateBeforeCapture = cloneGameState(this.state);
           this.pendingCaptureBaseMove = { type: 'place', to: pt };
           this.state.pendingCapture = true;
+
+          // Render interim board state showing the newly placed piece completing the mill
+          const interimState = cloneGameState(this.state);
+          interimState.board[pt] = this.humanPlayer;
+          if (this.humanPlayer === 1) {
+            interimState.whitePiecesInHand--;
+            interimState.whitePiecesOnBoard++;
+          } else {
+            interimState.blackPiecesInHand--;
+            interimState.blackPiecesOnBoard++;
+          }
+          interimState.pendingCapture = true;
+
           this.boardView?.setRecentMove(undefined, pt);
           this.boardView?.setCaptureTargets(validCaptures);
+          this.boardView?.render(interimState);
           this.updateHUD();
           return;
         }
@@ -236,8 +250,16 @@ export class GameSession {
             this.stateBeforeCapture = cloneGameState(this.state);
             this.pendingCaptureBaseMove = { type: moveType, from: this.selectedPoint, to: pt };
             this.state.pendingCapture = true;
+
+            // Render interim board state showing piece moved to destination completing the mill
+            const interimState = cloneGameState(this.state);
+            interimState.board[this.selectedPoint] = EMPTY;
+            interimState.board[pt] = this.humanPlayer;
+            interimState.pendingCapture = true;
+
             this.boardView?.setRecentMove(this.selectedPoint, pt);
             this.boardView?.setCaptureTargets(validCaptures);
+            this.boardView?.render(interimState);
             this.selectedPoint = null;
             this.updateHUD();
             return;
@@ -290,7 +312,7 @@ export class GameSession {
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 350));
       const [result] = await Promise.all([searchPromise, delayPromise]);
 
-      this.executeEngineMove(result.bestMove);
+      await this.executeEngineMove(result.bestMove);
     } catch (err) {
       console.error('Engine error:', err);
     } finally {
@@ -332,7 +354,21 @@ export class GameSession {
   }
 
   private handleUndo(): void {
-    if (this.undoStack.length === 0 || this.isEngineThinking) return;
+    if (this.isEngineThinking) return;
+
+    if (this.state.pendingCapture && this.stateBeforeCapture) {
+      this.state = this.stateBeforeCapture;
+      this.selectedPoint = null;
+      this.pendingCaptureBaseMove = null;
+      this.stateBeforeCapture = null;
+      this.boardView?.clearVisualFeedback();
+      this.modalContainer.classList.add('hidden');
+      this.updateHUD();
+      this.updateBoard();
+      return;
+    }
+
+    if (this.undoStack.length === 0) return;
 
     this.state = this.undoStack.pop()!;
     this.selectedPoint = null;

@@ -107,6 +107,7 @@ export class BoardView {
     bgPlate.setAttribute('fill', '#1e293b');
     bgPlate.setAttribute('stroke', '#334155');
     bgPlate.setAttribute('stroke-width', '2');
+    bgPlate.setAttribute('pointer-events', 'none');
     this.svg.appendChild(bgPlate);
 
     // 1. Draw Board Background Grid Lines
@@ -127,6 +128,7 @@ export class BoardView {
       trajLine.setAttribute('stroke-linecap', 'round');
       trajLine.setAttribute('opacity', '0.75');
       trajLine.setAttribute('class', 'move-trajectory-line');
+      trajLine.setAttribute('pointer-events', 'none');
       this.svg.appendChild(trajLine);
     }
 
@@ -316,6 +318,7 @@ export class BoardView {
   private drawBoardLines(): void {
     const linesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     linesGroup.setAttribute('class', 'board-lines');
+    linesGroup.setAttribute('pointer-events', 'none');
 
     // 3 Concentric Squares
     const squares = [
