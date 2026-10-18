@@ -21,6 +21,7 @@ Goal: Extract and establish the modular multi-game platform core, implement the 
 - [x] **TASK-105:** Universal Game Session Manager (`src/shell/session.ts`) handling turns, history stack, undo, timer, and HUD bridge.
 - [x] **TASK-106:** Nine Men's Morris module import (`src/games/morris/`) and SVG board integration.
 - [x] **TASK-107:** Automated test suite verifying platform contracts and Morris rules/engine.
+- [x] **TASK-108:** Nine Men's Morris SVG board presentation resilience and complete theme styling (`src/style.css`, `src/games/morris/ui/board-view.ts`, Ref: ADR-0005).
 
 ---
 
