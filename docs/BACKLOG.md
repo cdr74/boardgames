@@ -75,10 +75,10 @@ Goal: Universal sensory feedback using native Web APIs without external media as
 
 ---
 
-## Milestone 6: PWA Offline Shell, Persistence & Android Packaging (Status: ⚪ Planned)
+## Milestone 6: PWA Offline Shell, Persistence & Android Packaging (Status: 🟡 In Progress)
 Goal: Full offline capability, cross-session local persistence, and native Android APK release automation.
 
 - [ ] **TASK-601:** Web App Manifest and Service Worker with CacheFirst offline caching strategy.
 - [ ] **TASK-602:** LocalStorage persistence for auto-saving active match states per game.
-- [ ] **TASK-603:** Configure Capacitor with app ID `com.cdr74.boardgames` and adaptive icons.
-- [ ] **TASK-604:** `.github/workflows/release-android.yml` for automated APK build and GitHub Releases.
+- [x] **TASK-603:** Configure Capacitor with app ID `com.cdr74.boardgames` and adaptive icons.
+- [x] **TASK-604:** `.github/workflows/release-android.yml` for automated APK build and GitHub Releases.
