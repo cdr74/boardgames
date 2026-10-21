@@ -432,10 +432,27 @@ export class GameSession {
 
     if (phase === 'movement' || phase === 'flying') {
       if (this.morrisState.board[pt] === this.humanPlayer) {
+        if (this.selectedMorrisPoint === pt) {
+          // Deselect piece
+          this.selectedMorrisPoint = null;
+          this.morrisView?.setSelectedPoint(null);
+          this.morrisView?.setHighlightedPoints([]);
+          this.updateHUD();
+          this.updateBoard();
+          return;
+        }
+
+        // Select own piece
         this.selectedMorrisPoint = pt;
         const legalDests = this.getMorrisLegalDestinations(pt, phase);
+        if (legalDests.length === 0) {
+          this.hudView.updateStatus('This piece is blocked. Select another piece to slide.');
+        } else {
+          this.hudView.updateStatus('Piece selected. Tap an adjacent highlighted point to slide.');
+        }
         this.morrisView?.setSelectedPoint(pt);
         this.morrisView?.setHighlightedPoints(legalDests);
+        this.updateBoard();
         return;
       }
 
@@ -464,6 +481,8 @@ export class GameSession {
 
             this.morrisView?.setRecentMove(this.selectedMorrisPoint, pt);
             this.morrisView?.setCaptureTargets(validCaptures);
+            this.morrisView?.setSelectedPoint(null);
+            this.morrisView?.setHighlightedPoints([]);
             this.morrisView?.render(interimState);
             this.selectedMorrisPoint = null;
             this.updateHUD();
@@ -471,16 +490,17 @@ export class GameSession {
           }
         }
 
+        const fromPt = this.selectedMorrisPoint;
         this.morrisUndoStack.push(cloneMorrisState(this.morrisState));
         this.morrisState = applyMorrisMove(this.morrisState, {
           type: moveType,
-          from: this.selectedMorrisPoint,
+          from: fromPt,
           to: pt,
         });
 
-        this.morrisView?.setRecentMove(this.selectedMorrisPoint, pt);
         this.selectedMorrisPoint = null;
         this.morrisView?.clearVisualFeedback();
+        this.morrisView?.setRecentMove(fromPt, pt);
         this.updateHUD();
         this.updateBoard();
 

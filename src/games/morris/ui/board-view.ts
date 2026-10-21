@@ -299,7 +299,7 @@ export class BoardView {
           piece === 1 ? 'url(#grad-white-piece)' : 'url(#grad-black-piece)'
         );
         pieceCircle.setAttribute('filter', 'url(#piece-shadow)');
-        pieceCircle.setAttribute('stroke', piece === 1 ? '#cbd5e1' : '#0f172a');
+        pieceCircle.setAttribute('stroke', piece === 1 ? '#cbd5e1' : '#64748b');
         pieceCircle.setAttribute('stroke-width', '1.5');
         pieceCircle.setAttribute('class', `piece piece-${piece === 1 ? 'white' : 'black'}`);
         g.appendChild(pieceCircle);

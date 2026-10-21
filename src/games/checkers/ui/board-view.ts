@@ -74,8 +74,9 @@ export class CheckersBoardView {
       </radialGradient>
       <radialGradient id="grad-black-piece" cx="35%" cy="35%" r="65%">
         <stop offset="0%" stop-color="#475569"/>
-        <stop offset="70%" stop-color="#1e293b"/>
-        <stop offset="100%" stop-color="#0f172a"/>
+        <stop offset="40%" stop-color="#334155"/>
+        <stop offset="80%" stop-color="#0f172a"/>
+        <stop offset="100%" stop-color="#020617"/>
       </radialGradient>
       <filter id="piece-shadow" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.4"/>
@@ -116,11 +117,11 @@ export class CheckersBoardView {
 
         if (!isPlayableDark) {
           sqRect.setAttribute('class', 'checker-square light-square');
-          sqRect.setAttribute('fill', '#334155');
+          sqRect.setAttribute('fill', '#38495f');
           squaresGroup.appendChild(sqRect);
         } else {
           sqRect.setAttribute('class', 'checker-square dark-square');
-          sqRect.setAttribute('fill', '#1e293b');
+          sqRect.setAttribute('fill', '#141d2b');
           sqRect.setAttribute('stroke', '#0f172a');
           sqRect.setAttribute('stroke-width', '1');
           squaresGroup.appendChild(sqRect);
@@ -291,8 +292,8 @@ export class CheckersBoardView {
 
         if (isBlack(piece)) {
           outerCircle.setAttribute('fill', 'url(#grad-black-piece)');
-          outerCircle.setAttribute('stroke', '#0f172a');
-          outerCircle.setAttribute('stroke-width', '2');
+          outerCircle.setAttribute('stroke', '#cbd5e1'); // High contrast crisp silver rim
+          outerCircle.setAttribute('stroke-width', '2.5');
         } else {
           outerCircle.setAttribute('fill', 'url(#grad-white-piece)');
           outerCircle.setAttribute('stroke', '#cbd5e1');
@@ -306,7 +307,7 @@ export class CheckersBoardView {
         ridge1.setAttribute('cy', String(cy));
         ridge1.setAttribute('r', '20');
         ridge1.setAttribute('fill', 'none');
-        ridge1.setAttribute('stroke', isBlack(piece) ? '#475569' : '#cbd5e1');
+        ridge1.setAttribute('stroke', isBlack(piece) ? '#94a3b8' : '#cbd5e1');
         ridge1.setAttribute('stroke-width', '1.5');
         pieceG.appendChild(ridge1);
 
@@ -316,8 +317,8 @@ export class CheckersBoardView {
         ridge2.setAttribute('cy', String(cy));
         ridge2.setAttribute('r', '12');
         ridge2.setAttribute('fill', 'none');
-        ridge2.setAttribute('stroke', isBlack(piece) ? '#334155' : '#e2e8f0');
-        ridge2.setAttribute('stroke-width', '1');
+        ridge2.setAttribute('stroke', isBlack(piece) ? '#64748b' : '#e2e8f0');
+        ridge2.setAttribute('stroke-width', '1.2');
         pieceG.appendChild(ridge2);
 
         // King Crown Icon
