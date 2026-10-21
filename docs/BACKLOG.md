@@ -5,8 +5,8 @@ This backlog tracks architectural milestones, game implementations, and session 
 ---
 
 ## 📌 Session Handoff & Active State
-* **Last Completed Milestone:** Milestone 4: Game 4 — Reversi / Othello (Ref: ADR-0009, Tasks TASK-401..409, Release v0.3.1)
-* **Active Working Tree:** Post-M4 UX Polish & Device Validation complete (Pacing, Game Over Modal 1.2s Delay, Review Board action, Lobby streamling)
+* **Last Completed Milestone:** Milestone 4: Game 4 — Reversi / Othello (Ref: ADR-0009, ADR-0010, Tasks TASK-401..412, Release v0.3.2)
+* **Active Working Tree:** Post-M4 Difficulty Calibration complete (Connect Four Depth 3 on Medium, Reversi mobility moderation & scaled epsilon, Ref: ADR-0010)
 * **Immediate Next Focus:** Milestone 5: Audio Synthesizer, Haptics & Accessibility (Tasks TASK-501 to TASK-504)
 
 ---
@@ -65,6 +65,9 @@ Goal: Implement 8x8 territory flanking and disc-flipping strategy game.
 - [x] **TASK-407:** Calibrate move pacing: increase engine delay to 600ms in Connect Four and 650ms in Reversi, with a 500ms pause for consecutive AI passes (`src/shell/session.ts`).
 - [x] **TASK-408:** Implement 1.2s Game Over modal delay to preserve winning line and flipped disc visibility, plus a "Review Board" modal action to dismiss the overlay (`src/shell/session.ts`, `src/style.css`, `tests/shell/session.test.ts`).
 - [x] **TASK-409:** Streamline Game Lobby header/footer: remove confusing "Offline • On-Device Engine" badge and developer tech stack footer, simplify subtitle (`src/shell/lobby.ts`, `src/style.css`, `tests/shell/lobby.test.ts`).
+- [x] **TASK-410:** Difficulty Scaling Protocol & Engine Architecture: Extend `IGameDefinition` with optional `getDifficultyConfig` and pass `difficulty` to `evaluateState`, add graduated blunder curve in `GenericMinimaxEngine` (Ref: ADR-0010).
+- [x] **TASK-411:** Connect Four Difficulty Calibration: Tune Level 3 (Medium) to Depth 3, adjust candidate epsilon, and add graduated blunder rates (`src/games/connect-four/definition.ts`).
+- [x] **TASK-412:** Reversi Difficulty Calibration: Scale mobility and frontier heuristics by difficulty tier, widen candidate pool $\epsilon$, and configure game-specific difficulty configs (`src/games/reversi/evaluator.ts`, `src/games/reversi/definition.ts`).
 
 ---
 

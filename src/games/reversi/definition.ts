@@ -1,4 +1,4 @@
-import { GameOverResult, IGameDefinition, Player } from '../../platform/types';
+import { DifficultyLevel, EngineSearchOptions, GameOverResult, IGameDefinition, Player } from '../../platform/types';
 import { createInitialReversiState, serializeReversiState } from './board';
 import {
   evaluateReversiState,
@@ -28,8 +28,8 @@ export const reversiGameDefinition: IGameDefinition<ReversiState, ReversiMove> =
     return applyMove(state, move);
   },
 
-  evaluateState(state: ReversiState, perspectivePlayer: Player): number {
-    return evaluateReversiState(state, perspectivePlayer);
+  evaluateState(state: ReversiState, perspectivePlayer: Player, difficulty?: DifficultyLevel): number {
+    return evaluateReversiState(state, perspectivePlayer, difficulty);
   },
 
   serializeState(state: ReversiState): string {
@@ -54,5 +54,22 @@ export const reversiGameDefinition: IGameDefinition<ReversiState, ReversiMove> =
 
   isTacticalMove(move: ReversiMove, _state: ReversiState): boolean {
     return isReversiTacticalMove(move);
+  },
+
+  getDifficultyConfig(level: DifficultyLevel): Partial<EngineSearchOptions> {
+    if (level === 1) {
+      return { maxDepth: 1, epsilon: 160, temperature: 40, blunderRate: 0.35 };
+    }
+    if (level === 2) {
+      return { maxDepth: 2, epsilon: 90, temperature: 25, blunderRate: 0 };
+    }
+    if (level === 3) {
+      // Reversi Medium: Depth 4 with wider candidate epsilon (45) and moderated heuristics
+      return { maxDepth: 4, epsilon: 45, temperature: 18, blunderRate: 0 };
+    }
+    if (level === 4) {
+      return { maxDepth: 6, epsilon: 10, temperature: 6, blunderRate: 0 };
+    }
+    return { maxDepth: 8, epsilon: 0, temperature: 1, blunderRate: 0 };
   },
 };

@@ -1,5 +1,5 @@
 import { DIFFICULTY_CONFIGS } from './difficulty';
-import { EngineResult, EngineSearchOptions, IGameDefinition, Player } from '../types';
+import { DifficultyLevel, EngineResult, EngineSearchOptions, IGameDefinition, Player } from '../types';
 
 interface TTEntry<TMove> {
   depth: number;
@@ -14,6 +14,7 @@ export class GenericMinimaxEngine<TState, TMove> {
   private startTime = 0;
   private timeLimitMs = 0;
   private stopSearch = false;
+  private currentDifficulty?: DifficultyLevel;
 
   constructor(private readonly game: IGameDefinition<TState, TMove>) {}
 
@@ -30,13 +31,20 @@ export class GenericMinimaxEngine<TState, TMove> {
     }
 
     const difficultyConfig = options.difficulty ? DIFFICULTY_CONFIGS[options.difficulty] : undefined;
-    const deterministic = options.deterministic ?? false;
-    const epsilon = options.epsilon ?? difficultyConfig?.epsilon ?? 0;
-    const temperature = options.temperature ?? difficultyConfig?.temperature ?? 10;
+    const gameOverride = (this.game.getDifficultyConfig && options.difficulty)
+      ? this.game.getDifficultyConfig(options.difficulty)
+      : undefined;
 
-    // Special case for Level 1 (Beginner with blunder chance)
-    if (options.difficulty === 1 && !deterministic) {
-      const isBlunder = Math.random() < 0.35;
+    this.currentDifficulty = options.difficulty;
+    const deterministic = options.deterministic ?? false;
+    const maxDepth = options.maxDepth ?? gameOverride?.maxDepth ?? difficultyConfig?.maxDepth ?? 1;
+    const epsilon = options.epsilon ?? gameOverride?.epsilon ?? difficultyConfig?.epsilon ?? 0;
+    const temperature = options.temperature ?? gameOverride?.temperature ?? difficultyConfig?.temperature ?? 10;
+    const blunderRate = options.blunderRate ?? gameOverride?.blunderRate ?? difficultyConfig?.blunderRate ?? 0;
+
+    // Graduated blunder / flaw chance on non-deterministic searches
+    if (blunderRate > 0 && !deterministic) {
+      const isBlunder = Math.random() < blunderRate;
       if (isBlunder) {
         const randomMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
         return {
@@ -57,7 +65,6 @@ export class GenericMinimaxEngine<TState, TMove> {
     let depthReached = 1;
     let depthCandidates: { move: TMove; score: number }[] = [];
 
-    const maxDepth = options.maxDepth;
     const player = this.game.getCurrentPlayer(state);
 
     // Iterative Deepening
@@ -203,7 +210,7 @@ export class GenericMinimaxEngine<TState, TMove> {
     const gameOver = this.game.checkGameOver(state);
     if (gameOver.isOver || depth <= 0) {
       const currentPlayer = this.game.getCurrentPlayer(state);
-      return this.game.evaluateState(state, currentPlayer);
+      return this.game.evaluateState(state, currentPlayer, this.currentDifficulty);
     }
 
     const stateKey = `${this.game.serializeState(state)}:${depth}`;
@@ -218,7 +225,7 @@ export class GenericMinimaxEngine<TState, TMove> {
     const legalMoves = this.game.getLegalMoves(state);
     if (legalMoves.length === 0) {
       const currentPlayer = this.game.getCurrentPlayer(state);
-      return this.game.evaluateState(state, currentPlayer);
+      return this.game.evaluateState(state, currentPlayer, this.currentDifficulty);
     }
 
     const orderedMoves = this.orderMoves(legalMoves, state, deterministic);

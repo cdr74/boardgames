@@ -1,4 +1,4 @@
-import { GameOverResult, IGameDefinition, Player } from '../../platform/types';
+import { DifficultyLevel, EngineSearchOptions, GameOverResult, IGameDefinition, Player } from '../../platform/types';
 import {
   createInitialConnectFourState,
   serializeConnectFourState,
@@ -54,5 +54,22 @@ export const connectFourGameDefinition: IGameDefinition<ConnectFourState, Connec
 
   isTacticalMove(move: ConnectFourMove, state: ConnectFourState): boolean {
     return isConnectFourTacticalMove(move, state);
+  },
+
+  getDifficultyConfig(level: DifficultyLevel): Partial<EngineSearchOptions> {
+    if (level === 1) {
+      return { maxDepth: 1, epsilon: 60, temperature: 25, blunderRate: 0.35 };
+    }
+    if (level === 2) {
+      return { maxDepth: 2, epsilon: 35, temperature: 20, blunderRate: 0 };
+    }
+    if (level === 3) {
+      // Connect Four Medium: Depth 3 blocks direct 1-move threats without foreseeing 4-ply fork traps
+      return { maxDepth: 3, epsilon: 16, temperature: 14, blunderRate: 0 };
+    }
+    if (level === 4) {
+      return { maxDepth: 6, epsilon: 4, temperature: 4, blunderRate: 0 };
+    }
+    return { maxDepth: 8, epsilon: 0, temperature: 1, blunderRate: 0 };
   },
 };

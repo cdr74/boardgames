@@ -2,6 +2,7 @@ import { CORNERS, DIRECTIONS, TOTAL_SQUARES } from './constants';
 import { coordFromIndex, indexFromCoord, isInsideBoard } from './board';
 import { getLegalMovesForPlayer, getOpponent } from './rules';
 import { Cell, EMPTY, Player, ReversiMove, ReversiState } from './types';
+import { DifficultyLevel } from '../../platform/types';
 
 export const STATIC_WEIGHTS: readonly number[] = [
   100, -20,  10,   5,   5,  10, -20, 100,
@@ -54,7 +55,8 @@ export function countFrontierDiscs(board: Cell[], player: Player): number {
  */
 export function evaluateReversiState(
   state: ReversiState,
-  perspectivePlayer: Player
+  perspectivePlayer: Player,
+  difficulty?: DifficultyLevel
 ): number {
   const opponent = getOpponent(perspectivePlayer);
   const myCount = perspectivePlayer === 1 ? state.blackCount : state.whiteCount;
@@ -111,13 +113,33 @@ export function evaluateReversiState(
   const oppMoves = getLegalMovesForPlayer(board, opponent).length;
   let mobilityScore = 0;
   if (myMoves + oppMoves > 0) {
-    mobilityScore = Math.round((100 * (myMoves - oppMoves)) / (myMoves + oppMoves)) * 4;
+    // Scale mobility weight by difficulty tier:
+    // Level 1: 0 (Beginners don't calculate mobility differential)
+    // Level 2: 1 (Gentle awareness of move options, +/- 100 max)
+    // Level 3: 2 (Moderate positional awareness, +/- 200 max)
+    // Level 4-5 (or undefined): 4 (Full master-level mobility starvation, +/- 400 max)
+    const mobilityWeight =
+      difficulty === 1 ? 0 :
+      difficulty === 2 ? 1 :
+      difficulty === 3 ? 2 : 4;
+
+    mobilityScore = Math.round((100 * (myMoves - oppMoves)) / (myMoves + oppMoves)) * mobilityWeight;
   }
 
   // 4. Frontier Exposure (Fewer frontier pieces is preferable)
   const myFrontier = countFrontierDiscs(board, perspectivePlayer);
   const oppFrontier = countFrontierDiscs(board, opponent);
-  const frontierScore = -(myFrontier - oppFrontier) * 6;
+  // Scale frontier weight by difficulty tier:
+  // Level 1: 0
+  // Level 2: 2
+  // Level 3: 4
+  // Level 4-5 (or undefined): 6
+  const frontierWeight =
+    difficulty === 1 ? 0 :
+    difficulty === 2 ? 2 :
+    difficulty === 3 ? 4 : 6;
+
+  const frontierScore = -(myFrontier - oppFrontier) * frontierWeight;
 
   // 5. Coin Parity (Graduated by game phase)
   let coinScore = 0;

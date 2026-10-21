@@ -97,4 +97,26 @@ describe('Reversi - Evaluator & Move Ordering (TASK-403)', () => {
     expect(evaluateReversiState(wonState, 1)).toBe(100000 + (40 - 24) * 100);
     expect(evaluateReversiState(lossState, 1)).toBe(-(100000 + (44 - 20) * 100));
   });
+
+  it('scales mobility and frontier starvation weights by difficulty level', () => {
+    // Initial state has symmetric legal moves (4 vs 4)
+    // Modify board to give Black asymmetric mobility advantage
+    const state = createInitialReversiState();
+    state.board[19] = 1; // Square 19 Black
+    state.blackCount = 3;
+
+    const evalLvl1 = evaluateReversiState(state, 1, 1);
+    const evalLvl2 = evaluateReversiState(state, 1, 2);
+    const evalLvl3 = evaluateReversiState(state, 1, 3);
+    const evalLvl4 = evaluateReversiState(state, 1, 4);
+    const evalMaster = evaluateReversiState(state, 1, 5);
+
+    // Master and Level 4 apply full mobility and frontier weights
+    expect(evalLvl4).toBe(evalMaster);
+
+    // Levels 1, 2, and 3 apply moderated heuristics
+    expect(evalLvl1).not.toBe(evalMaster);
+    expect(evalLvl2).not.toBe(evalMaster);
+    expect(evalLvl3).not.toBe(evalMaster);
+  });
 });

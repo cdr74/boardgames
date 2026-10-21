@@ -34,4 +34,20 @@ describe('Connect Four - Search Variability & Difficulty Scaling', () => {
     // In Level 1, with epsilon pool and blunder rate, AI should sample multiple distinct columns
     expect(selectedCols.size).toBeGreaterThan(1);
   });
+
+  it('calibrates Level 3 (Medium) to Depth 3 preventing excessive 4-ply fork lookahead', () => {
+    const state = createInitialConnectFourState();
+    const config = DIFFICULTY_CONFIGS[3];
+
+    // Search on Level 3 without explicit maxDepth override
+    const searchOptions = {
+      difficulty: config.difficulty,
+      maxDepth: undefined as any,
+      deterministic: true,
+    };
+    const result = engine.search(state, searchOptions);
+
+    // Should reach depth 3 according to game-specific override
+    expect(result.depthReached).toBe(3);
+  });
 });

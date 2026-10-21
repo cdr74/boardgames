@@ -34,4 +34,21 @@ describe('Reversi - Engine Variability & Determinism', () => {
     // In Level 1, with epsilon candidate pool and blunder factor, AI should explore multiple opening moves
     expect(chosenSquares.size).toBeGreaterThan(1);
   });
+
+  it('exhibits natural candidate move exploration on Level 3 (Medium) via scaled epsilon', () => {
+    const state = createInitialReversiState();
+
+    const chosenSquares = new Set<number>();
+    for (let i = 0; i < 20; i++) {
+      const result = engine.search(state, {
+        difficulty: 3,
+        maxDepth: undefined as any,
+        deterministic: false,
+      });
+      chosenSquares.add(result.bestMove.square);
+    }
+
+    // With epsilon = 45 and temperature = 18 on Level 3, the engine explores multiple opening candidates
+    expect(chosenSquares.size).toBeGreaterThan(1);
+  });
 });

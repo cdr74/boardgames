@@ -15,6 +15,7 @@ export interface EngineSearchOptions {
   temperature?: number;
   epsilon?: number;
   deterministic?: boolean;
+  blunderRate?: number;
 }
 
 export interface EngineResult<TMove> {
@@ -32,9 +33,10 @@ export interface IGameDefinition<TState, TMove> {
   getCurrentPlayer(state: TState): Player;
   getLegalMoves(state: TState): TMove[];
   applyMove(state: TState, move: TMove): TState;
-  evaluateState(state: TState, perspectivePlayer: Player): number;
+  evaluateState(state: TState, perspectivePlayer: Player, difficulty?: DifficultyLevel): number;
   serializeState(state: TState): string;
   checkGameOver(state: TState): GameOverResult;
   orderMoves?(moves: TMove[], state: TState, deterministic?: boolean): TMove[];
   isTacticalMove?(move: TMove, state: TState): boolean;
+  getDifficultyConfig?(level: DifficultyLevel): Partial<EngineSearchOptions>;
 }
