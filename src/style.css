@@ -538,4 +538,19 @@ body {
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Reversi Board Styles */
+.reversi-board-svg {
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.45));
+}
+
+.reversi-square-interactive.square-legal:hover rect {
+  fill: rgba(255, 255, 255, 0.12);
+  transition: fill 0.15s ease;
+}
+
+.reversi-dest-dot {
+  pointer-events: none;
+}
+
+
 

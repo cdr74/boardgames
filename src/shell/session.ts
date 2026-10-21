@@ -55,6 +55,26 @@ import {
   ConnectFourState,
 } from '../games/connect-four/types';
 
+import { ReversiBoardView } from '../games/reversi/ui/board-view';
+import {
+  formatStatusMessage as formatReversiStatusMessage,
+  getPlayerColorName as getReversiColorName,
+} from '../games/reversi/ui/ui-helpers';
+import {
+  cloneReversiState,
+  createInitialReversiState,
+} from '../games/reversi/board';
+import {
+  applyMove as applyReversiMove,
+  getOpponent as getReversiOpponent,
+  isValidMove as isValidReversiMove,
+} from '../games/reversi/rules';
+import {
+  ReversiMove,
+  ReversiState,
+  SquareIndex as ReversiSquareIndex,
+} from '../games/reversi/types';
+
 import { EngineClient } from '../platform/worker/client';
 import { DIFFICULTY_CONFIGS } from '../platform/engine/difficulty';
 import { DifficultyLevel, Player } from '../platform/types';
@@ -99,6 +119,11 @@ export class GameSession {
   private connectFourState: ConnectFourState;
   private connectFourUndoStack: ConnectFourState[] = [];
 
+  // Reversi state & view
+  private reversiView?: ReversiBoardView;
+  private reversiState: ReversiState;
+  private reversiUndoStack: ReversiState[] = [];
+
   constructor(container: HTMLElement, gameMeta: GameMetadata, callbacks: SessionCallbacks) {
     this.container = container;
     this.gameMeta = gameMeta;
@@ -106,6 +131,7 @@ export class GameSession {
     this.morrisState = createInitialMorrisState();
     this.checkersState = createInitialCheckersState();
     this.connectFourState = createInitialConnectFourState();
+    this.reversiState = createInitialReversiState();
     this.engineClient = new EngineClient();
   }
 
@@ -158,6 +184,10 @@ export class GameSession {
     } else if (this.gameMeta.id === 'connect-four') {
       this.connectFourView = new ConnectFourBoardView(this.boardContainer, {
         onColumnClick: (col) => this.handleConnectFourColumnClick(col),
+      });
+    } else if (this.gameMeta.id === 'reversi') {
+      this.reversiView = new ReversiBoardView(this.boardContainer, {
+        onSquareClick: (sq) => this.handleReversiSquareClick(sq),
       });
     }
 
@@ -236,6 +266,25 @@ export class GameSession {
       if (this.humanPlayer === 2 && this.connectFourState.turn === 1) {
         await this.triggerConnectFourEngineMove();
       }
+    } else if (this.gameMeta.id === 'reversi') {
+      this.reversiState = createInitialReversiState();
+      this.reversiUndoStack = [];
+      this.reversiView?.clearVisualFeedback();
+
+      this.hudView.render(
+        this.gameMeta.name,
+        this.currentDifficulty,
+        this.humanPlayer,
+        false,
+        this.getStatusMessage(),
+        { player1: 'Black (1st)', player2: 'White (2nd)' }
+      );
+
+      this.updateBoard();
+
+      if (this.humanPlayer === 2 && this.reversiState.turn === 1) {
+        await this.triggerReversiEngineMove();
+      }
     }
   }
 
@@ -259,9 +308,16 @@ export class GameSession {
         isEngineThinking: this.isEngineThinking,
         hasMandatoryJump,
       });
-    } else {
+    } else if (this.gameMeta.id === 'connect-four') {
       return formatConnectFourStatusMessage({
         state: this.connectFourState,
+        humanPlayer: this.humanPlayer,
+        difficulty: this.currentDifficulty,
+        isEngineThinking: this.isEngineThinking,
+      });
+    } else {
+      return formatReversiStatusMessage({
+        state: this.reversiState,
         humanPlayer: this.humanPlayer,
         difficulty: this.currentDifficulty,
         isEngineThinking: this.isEngineThinking,
@@ -278,7 +334,9 @@ export class GameSession {
         ? this.morrisUndoStack.length > 0
         : this.gameMeta.id === 'checkers'
         ? this.checkersUndoStack.length > 0
-        : this.connectFourUndoStack.length > 0;
+        : this.gameMeta.id === 'connect-four'
+        ? this.connectFourUndoStack.length > 0
+        : this.reversiUndoStack.length > 0;
     this.hudView.setUndoEnabled(hasUndo && !this.isEngineThinking);
   }
 
@@ -299,6 +357,12 @@ export class GameSession {
       if (!this.connectFourView) return;
       this.connectFourView.render(this.connectFourState);
       if (this.connectFourState.winner !== null) {
+        this.showGameOverModal();
+      }
+    } else if (this.gameMeta.id === 'reversi') {
+      if (!this.reversiView) return;
+      this.reversiView.render(this.reversiState);
+      if (this.reversiState.winner !== null) {
         this.showGameOverModal();
       }
     }
@@ -699,6 +763,67 @@ export class GameSession {
   }
 
   // ==========================================
+  // Reversi Gameplay Interaction
+  // ==========================================
+  private async handleReversiSquareClick(sq: ReversiSquareIndex): Promise<void> {
+    if (this.isEngineThinking || this.reversiState.winner !== null) return;
+    if (this.reversiState.turn !== this.humanPlayer) return;
+    if (!isValidReversiMove(this.reversiState, sq)) return;
+
+    // Record undo state before move
+    this.reversiUndoStack.push(cloneReversiState(this.reversiState));
+
+    // Apply human move
+    this.reversiState = applyReversiMove(this.reversiState, { square: sq });
+    this.reversiView?.setRecentMove(this.reversiState.lastMove);
+    this.updateHUD();
+    this.updateBoard();
+
+    // Trigger AI move if game not over and turn is AI
+    if (this.reversiState.winner === null && this.reversiState.turn !== this.humanPlayer) {
+      await this.triggerReversiEngineMove();
+    }
+  }
+
+  private async triggerReversiEngineMove(): Promise<void> {
+    // Reversi can have consecutive turns for a player due to passes
+    while (
+      this.reversiState.winner === null &&
+      this.reversiState.turn !== this.humanPlayer
+    ) {
+      this.isEngineThinking = true;
+      this.updateHUD();
+
+      const config = DIFFICULTY_CONFIGS[this.currentDifficulty];
+
+      try {
+        const searchPromise = this.engineClient.search<ReversiState, ReversiMove>(
+          'reversi',
+          this.reversiState,
+          config
+        );
+
+        const [searchResult] = await Promise.all([
+          searchPromise,
+          new Promise((resolve) => setTimeout(resolve, 350)),
+        ]);
+
+        const move = searchResult.bestMove;
+        this.reversiUndoStack.push(cloneReversiState(this.reversiState));
+        this.reversiState = applyReversiMove(this.reversiState, move);
+        this.reversiView?.setRecentMove(this.reversiState.lastMove);
+      } catch (err) {
+        console.error('Reversi engine search failed:', err);
+        break;
+      } finally {
+        this.isEngineThinking = false;
+        this.updateHUD();
+        this.updateBoard();
+      }
+    }
+  }
+
+  // ==========================================
   // Universal Undo & Modals
   // ==========================================
   private handleUndo(): void {
@@ -741,6 +866,14 @@ export class GameSession {
 
       this.connectFourState = this.connectFourUndoStack.pop()!;
       this.connectFourView?.clearVisualFeedback();
+      this.modalContainer.classList.add('hidden');
+      this.updateHUD();
+      this.updateBoard();
+    } else if (this.gameMeta.id === 'reversi') {
+      if (this.reversiUndoStack.length === 0) return;
+
+      this.reversiState = this.reversiUndoStack.pop()!;
+      this.reversiView?.clearVisualFeedback();
       this.modalContainer.classList.add('hidden');
       this.updateHUD();
       this.updateBoard();
@@ -803,6 +936,28 @@ export class GameSession {
         modalDesc.textContent = `The engine (${getConnectFourColorName(
           getConnectFourOpponent(this.humanPlayer)
         )}) connected four discs.`;
+      }
+    } else if (this.gameMeta.id === 'reversi') {
+      if (this.reversiState.winner === 'draw') {
+        modalTitle.textContent = 'Game Draw!';
+        modalDesc.textContent = `A perfectly balanced match (${this.reversiState.blackCount} - ${this.reversiState.whiteCount}).`;
+      } else if (this.reversiState.winner === this.humanPlayer) {
+        modalTitle.textContent = 'Victory!';
+        const myScore = this.humanPlayer === 1 ? this.reversiState.blackCount : this.reversiState.whiteCount;
+        const oppScore = this.humanPlayer === 1 ? this.reversiState.whiteCount : this.reversiState.blackCount;
+        modalDesc.textContent =
+          this.reversiState.winReason === 'wipeout'
+            ? 'Congratulations! You wiped out all opponent discs!'
+            : `Congratulations! You won ${myScore} to ${oppScore} discs!`;
+      } else {
+        modalTitle.textContent = 'Defeat';
+        const oppColor = getReversiColorName(getReversiOpponent(this.humanPlayer));
+        const myScore = this.humanPlayer === 1 ? this.reversiState.blackCount : this.reversiState.whiteCount;
+        const oppScore = this.humanPlayer === 1 ? this.reversiState.whiteCount : this.reversiState.blackCount;
+        modalDesc.textContent =
+          this.reversiState.winReason === 'wipeout'
+            ? `The engine (${oppColor}) wiped out all your discs.`
+            : `The engine (${oppColor}) won ${oppScore} to ${myScore} discs.`;
       }
     }
 

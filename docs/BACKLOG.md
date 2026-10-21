@@ -53,15 +53,15 @@ Goal: Implement classic 7x6 vertical gravity drop alignment game.
 
 ---
 
-## Milestone 4: Game 4 — Reversi / Othello (Status: 🟡 In Progress)
+## Milestone 4: Game 4 — Reversi / Othello (Status: 🟢 Completed)
 Goal: Implement 8x8 territory flanking and disc-flipping strategy game.
 
 - [x] **TASK-401:** ADR & Rules Specification (Ref: `docs/adr/0009-reversi-rules-and-stability-heuristics.md`).
-- [ ] **TASK-402:** Implement 8x8 board representation, 8-directional ray flanking calculations, disc flipping, and pass mechanics.
-- [ ] **TASK-403:** Implement heuristic evaluator (corner stability, frontier piece minimization, mobility restriction).
-- [ ] **TASK-404:** Implement `ReversiGameDefinition`.
-- [ ] **TASK-405:** Implement responsive 8x8 felt SVG board with legal flip previews.
-- [ ] **TASK-406:** Register Reversi in Game Lobby menu list and create automated test suite.
+- [x] **TASK-402:** Implement 8x8 board representation, 8-directional ray flanking calculations, disc flipping, and pass mechanics.
+- [x] **TASK-403:** Implement heuristic evaluator (corner stability, frontier piece minimization, mobility restriction).
+- [x] **TASK-404:** Implement `ReversiGameDefinition`.
+- [x] **TASK-405:** Implement responsive 8x8 felt SVG board with legal flip previews.
+- [x] **TASK-406:** Register Reversi in Game Lobby menu list and create automated test suite.
 
 ---
 

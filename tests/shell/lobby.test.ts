@@ -55,7 +55,7 @@ describe('LobbyView Overview Page', () => {
     lobby.render();
 
     const playBtns = container.querySelectorAll<HTMLButtonElement>('.btn-play-game:not(.disabled)');
-    expect(playBtns.length).toBe(3); // Morris, Checkers, and Connect Four
+    expect(playBtns.length).toBe(4); // Morris, Checkers, Connect Four, and Reversi
 
     // Test Morris button
     playBtns[0].click();
@@ -68,19 +68,25 @@ describe('LobbyView Overview Page', () => {
     // Test Connect Four button
     playBtns[2].click();
     expect(selectedGameId).toBe('connect-four');
+
+    // Test Reversi button
+    playBtns[3].click();
+    expect(selectedGameId).toBe('reversi');
   });
 
-  it('disables play buttons for games in scaffolding or planning', () => {
-    lobby.render();
-
-    const disabledBtns = container.querySelectorAll<HTMLButtonElement>('.btn-play-game.disabled');
-    expect(disabledBtns.length).toBeGreaterThan(0);
-
-    disabledBtns.forEach((btn) => {
-      expect(btn.disabled).toBe(true);
-      btn.click();
-    });
-
-    expect(selectedGameId).toBeNull();
+  it('renders disabled play buttons for games in scaffolding or planning', () => {
+    const testGame = {
+      id: 'gomoku',
+      name: 'Gomoku',
+      description: 'Five in a row',
+      status: 'planned' as const,
+      badgeText: 'Planned',
+    };
+    const cardHtml = (lobby as any).renderGameCard(testGame);
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = cardHtml;
+    const btn = wrapper.querySelector<HTMLButtonElement>('.btn-play-game.disabled');
+    expect(btn).not.toBeNull();
+    expect(btn?.disabled).toBe(true);
   });
 });

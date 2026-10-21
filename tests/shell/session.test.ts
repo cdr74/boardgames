@@ -199,6 +199,63 @@ describe('GameSession Universal Controller (TASK-207)', () => {
     expect(redDiscsAfter.length).toBe(0);
   });
 
+  it('initializes and handles human square placement and undo in Reversi session', async () => {
+    const reversiMeta = GAME_REGISTRY.find((g) => g.id === 'reversi')!;
+    const session = new GameSession(container, reversiMeta, {
+      onReturnToLobby: () => {
+        returnedToLobby = true;
+      },
+    });
+
+    session.start();
+
+    const titleEl = container.querySelector('.hud-game-title');
+    expect(titleEl?.textContent).toBe('Reversi');
+
+    const reversiSvg = container.querySelector('svg.reversi-board-svg');
+    expect(reversiSvg).not.toBeNull();
+    expect(reversiSvg?.getAttribute('aria-label')).toBe('Reversi Game Board');
+
+    // Color dropdown should have Black (1st) and White (2nd)
+    const selectColor = container.querySelector<HTMLSelectElement>('#select-color');
+    expect(selectColor).not.toBeNull();
+    const options = Array.from(selectColor?.querySelectorAll('option') ?? []).map((o) => o.textContent?.trim());
+    expect(options).toEqual(['Black (1st)', 'White (2nd)']);
+
+    // Initial state has 4 legal move dots for Black
+    const legalDots = container.querySelectorAll('.reversi-legal-dots circle');
+    expect(legalDots.length).toBe(4);
+
+    // Click legal square 19
+    const sq19 = container.querySelector<SVGGElement>('g[data-square-index="19"]');
+    expect(sq19).not.toBeNull();
+    sq19?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    // Disc at 19 is now Black and disc at 27 is flipped to Black
+    const disc19 = container.querySelector('.reversi-disc[data-square-index="19"]');
+    expect(disc19?.classList.contains('disc-black')).toBe(true);
+    const disc27 = container.querySelector('.reversi-disc[data-square-index="27"]');
+    expect(disc27?.classList.contains('disc-black')).toBe(true);
+
+    // Recent move ring is present
+    const recentRing = container.querySelector('circle.recent-move-to');
+    expect(recentRing).not.toBeNull();
+
+    // Undo button should be enabled
+    const btnUndo = container.querySelector<HTMLButtonElement>('#btn-undo');
+    expect(btnUndo?.disabled).toBe(false);
+
+    // Click Undo
+    btnUndo?.click();
+
+    // Disc 19 is removed, and disc 27 is reverted back to White
+    const disc19After = container.querySelector('.reversi-disc[data-square-index="19"]');
+    expect(disc19After).toBeNull();
+    const disc27After = container.querySelector('.reversi-disc[data-square-index="27"]');
+    expect(disc27After?.classList.contains('disc-white')).toBe(true);
+  });
+
   it('triggers onReturnToLobby when clicking the Back to Menu button', () => {
     const checkersMeta = GAME_REGISTRY.find((g) => g.id === 'checkers')!;
     const session = new GameSession(container, checkersMeta, {

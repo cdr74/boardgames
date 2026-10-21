@@ -1,6 +1,7 @@
 import { checkersGameDefinition } from './checkers';
 import { connectFourGameDefinition } from './connect-four';
 import { morrisGameDefinition } from './morris';
+import { reversiGameDefinition } from './reversi';
 import { IGameDefinition } from '../platform/types';
 
 export interface GameMetadata {
@@ -43,7 +44,7 @@ export const GAME_REGISTRY: GameMetadata[] = [
     name: 'Reversi',
     subtitle: 'Othello • 8x8 Territory Flanking',
     description: 'Dynamic disc-flipping territory game. Trap opponent pieces between your discs to flip them to your color.',
-    status: 'planned',
-    badgeText: 'Milestone 4',
+    status: 'playable',
+    definition: reversiGameDefinition,
   },
 ];
