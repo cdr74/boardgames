@@ -41,15 +41,15 @@ Goal: Implement standard 8x8 English Checkers (Draughts) with diagonal sliding, 
 
 ---
 
-## Milestone 3: Game 3 — Connect Four (Status: 🟡 In Progress)
+## Milestone 3: Game 3 — Connect Four (Status: 🟢 Completed)
 Goal: Implement classic 7x6 vertical gravity drop alignment game.
 
 - [x] **TASK-301:** ADR & Rules Specification (Ref: `docs/adr/0008-connect-four-rules-and-bitboards.md`).
-- [ ] **TASK-302:** Implement 7x6 board representation, gravity drop mechanics, and contiguous 4-in-a-row detection.
-- [ ] **TASK-303:** Implement heuristic evaluator (center column priority, open-ended 2- and 3-in-a-row threat weights).
-- [ ] **TASK-304:** Implement `ConnectFourGameDefinition`.
-- [ ] **TASK-305:** Implement responsive 7x6 perforated SVG board with drop bounce animations.
-- [ ] **TASK-306:** Register Connect Four in Game Lobby menu list and create automated test suite.
+- [x] **TASK-302:** Implement 7x6 board representation, gravity drop mechanics, and contiguous 4-in-a-row detection.
+- [x] **TASK-303:** Implement heuristic evaluator (center column priority, open-ended 2- and 3-in-a-row threat weights).
+- [x] **TASK-304:** Implement `ConnectFourGameDefinition`.
+- [x] **TASK-305:** Implement responsive 7x6 perforated SVG board with drop bounce animations.
+- [x] **TASK-306:** Register Connect Four in Game Lobby menu list and create automated test suite.
 
 ---
 

@@ -1,4 +1,5 @@
 import { checkersGameDefinition } from './checkers';
+import { connectFourGameDefinition } from './connect-four';
 import { morrisGameDefinition } from './morris';
 import { IGameDefinition } from '../platform/types';
 
@@ -34,8 +35,8 @@ export const GAME_REGISTRY: GameMetadata[] = [
     name: 'Connect Four',
     subtitle: 'Vertical Drop • 7x6 Grid',
     description: 'Gravity-drop alignment game. First player to connect four checkers horizontally, vertically, or diagonally wins.',
-    status: 'planned',
-    badgeText: 'Milestone 3',
+    status: 'playable',
+    definition: connectFourGameDefinition,
   },
   {
     id: 'reversi',

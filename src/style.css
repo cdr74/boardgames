@@ -524,3 +524,18 @@ body {
   animation: pulse-red 1.2s ease-in-out infinite;
 }
 
+/* Connect Four Board Styles */
+.connect-four-board-svg {
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.5));
+}
+
+.c4-column-target.col-open:hover rect {
+  fill: rgba(56, 189, 248, 0.08);
+  transition: fill 0.15s ease;
+}
+
+.c4-disc {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+

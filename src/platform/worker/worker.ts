@@ -1,4 +1,5 @@
 import { checkersGameDefinition } from '../../games/checkers';
+import { connectFourGameDefinition } from '../../games/connect-four';
 import { morrisGameDefinition } from '../../games/morris';
 import { GenericMinimaxEngine } from '../engine/minimax';
 import { EngineSearchOptions, IGameDefinition } from '../types';
@@ -13,6 +14,8 @@ function getEngine(gameId: string): GenericMinimaxEngine<any, any> {
       definition = morrisGameDefinition;
     } else if (gameId === 'checkers') {
       definition = checkersGameDefinition;
+    } else if (gameId === 'connect-four') {
+      definition = connectFourGameDefinition;
     } else {
       throw new Error(`Unknown game: ${gameId}`);
     }

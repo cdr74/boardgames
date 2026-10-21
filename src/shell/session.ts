@@ -36,6 +36,25 @@ import {
   SquareIndex,
 } from '../games/checkers/types';
 
+import { ConnectFourBoardView } from '../games/connect-four/ui/board-view';
+import {
+  formatStatusMessage as formatConnectFourStatusMessage,
+  getPlayerColorName as getConnectFourColorName,
+} from '../games/connect-four/ui/ui-helpers';
+import {
+  cloneConnectFourState,
+  createInitialConnectFourState,
+} from '../games/connect-four/board';
+import {
+  applyMove as applyConnectFourMove,
+  getOpponent as getConnectFourOpponent,
+  isValidMove as isValidConnectFourMove,
+} from '../games/connect-four/rules';
+import {
+  ConnectFourMove,
+  ConnectFourState,
+} from '../games/connect-four/types';
+
 import { EngineClient } from '../platform/worker/client';
 import { DIFFICULTY_CONFIGS } from '../platform/engine/difficulty';
 import { DifficultyLevel, Player } from '../platform/types';
@@ -75,12 +94,18 @@ export class GameSession {
   private checkersUndoStack: CheckersState[] = [];
   private selectedCheckersSquare: SquareIndex | null = null;
 
+  // Connect Four state & view
+  private connectFourView?: ConnectFourBoardView;
+  private connectFourState: ConnectFourState;
+  private connectFourUndoStack: ConnectFourState[] = [];
+
   constructor(container: HTMLElement, gameMeta: GameMetadata, callbacks: SessionCallbacks) {
     this.container = container;
     this.gameMeta = gameMeta;
     this.callbacks = callbacks;
     this.morrisState = createInitialMorrisState();
     this.checkersState = createInitialCheckersState();
+    this.connectFourState = createInitialConnectFourState();
     this.engineClient = new EngineClient();
   }
 
@@ -129,6 +154,10 @@ export class GameSession {
     } else if (this.gameMeta.id === 'checkers') {
       this.checkersView = new CheckersBoardView(this.boardContainer, {
         onSquareClick: (sq) => this.handleCheckersSquareClick(sq),
+      });
+    } else if (this.gameMeta.id === 'connect-four') {
+      this.connectFourView = new ConnectFourBoardView(this.boardContainer, {
+        onColumnClick: (col) => this.handleConnectFourColumnClick(col),
       });
     }
 
@@ -188,6 +217,25 @@ export class GameSession {
       if (this.humanPlayer === 2 && this.checkersState.turn === 1) {
         await this.triggerCheckersEngineMove();
       }
+    } else if (this.gameMeta.id === 'connect-four') {
+      this.connectFourState = createInitialConnectFourState();
+      this.connectFourUndoStack = [];
+      this.connectFourView?.clearVisualFeedback();
+
+      this.hudView.render(
+        this.gameMeta.name,
+        this.currentDifficulty,
+        this.humanPlayer,
+        false,
+        this.getStatusMessage(),
+        { player1: 'Red (1st)', player2: 'Yellow (2nd)' }
+      );
+
+      this.updateBoard();
+
+      if (this.humanPlayer === 2 && this.connectFourState.turn === 1) {
+        await this.triggerConnectFourEngineMove();
+      }
     }
   }
 
@@ -200,7 +248,7 @@ export class GameSession {
         isPendingCapture: this.morrisState.pendingCapture,
         isEngineThinking: this.isEngineThinking,
       });
-    } else {
+    } else if (this.gameMeta.id === 'checkers') {
       const legalMoves = getCheckersLegalMoves(this.checkersState);
       const hasMandatoryJump = legalMoves.length > 0 && legalMoves[0].isJump;
 
@@ -210,6 +258,13 @@ export class GameSession {
         difficulty: this.currentDifficulty,
         isEngineThinking: this.isEngineThinking,
         hasMandatoryJump,
+      });
+    } else {
+      return formatConnectFourStatusMessage({
+        state: this.connectFourState,
+        humanPlayer: this.humanPlayer,
+        difficulty: this.currentDifficulty,
+        isEngineThinking: this.isEngineThinking,
       });
     }
   }
@@ -221,7 +276,9 @@ export class GameSession {
     const hasUndo =
       this.gameMeta.id === 'nine-mens-morris'
         ? this.morrisUndoStack.length > 0
-        : this.checkersUndoStack.length > 0;
+        : this.gameMeta.id === 'checkers'
+        ? this.checkersUndoStack.length > 0
+        : this.connectFourUndoStack.length > 0;
     this.hudView.setUndoEnabled(hasUndo && !this.isEngineThinking);
   }
 
@@ -236,6 +293,12 @@ export class GameSession {
       if (!this.checkersView) return;
       this.checkersView.render(this.checkersState);
       if (this.checkersState.winner !== null) {
+        this.showGameOverModal();
+      }
+    } else if (this.gameMeta.id === 'connect-four') {
+      if (!this.connectFourView) return;
+      this.connectFourView.render(this.connectFourState);
+      if (this.connectFourState.winner !== null) {
         this.showGameOverModal();
       }
     }
@@ -579,6 +642,63 @@ export class GameSession {
   }
 
   // ==========================================
+  // Connect Four Gameplay Interaction
+  // ==========================================
+  private async handleConnectFourColumnClick(col: number): Promise<void> {
+    if (this.isEngineThinking || this.connectFourState.winner !== null) return;
+    if (this.connectFourState.turn !== this.humanPlayer) return;
+    if (!isValidConnectFourMove(this.connectFourState, col)) return;
+
+    const row = this.connectFourState.heights[col];
+    const move: ConnectFourMove = { column: col, row };
+
+    // Record undo state before move
+    this.connectFourUndoStack.push(cloneConnectFourState(this.connectFourState));
+
+    // Apply human move
+    this.connectFourState = applyConnectFourMove(this.connectFourState, move);
+    this.connectFourView?.setRecentMove(move);
+    this.updateHUD();
+    this.updateBoard();
+
+    // Trigger AI move if game not over
+    if (this.connectFourState.winner === null && this.connectFourState.turn !== this.humanPlayer) {
+      await this.triggerConnectFourEngineMove();
+    }
+  }
+
+  private async triggerConnectFourEngineMove(): Promise<void> {
+    this.isEngineThinking = true;
+    this.updateHUD();
+
+    const config = DIFFICULTY_CONFIGS[this.currentDifficulty];
+
+    try {
+      const searchPromise = this.engineClient.search<ConnectFourState, ConnectFourMove>(
+        'connect-four',
+        this.connectFourState,
+        config
+      );
+
+      const [searchResult] = await Promise.all([
+        searchPromise,
+        new Promise((resolve) => setTimeout(resolve, 350)),
+      ]);
+
+      const move = searchResult.bestMove;
+      this.connectFourUndoStack.push(cloneConnectFourState(this.connectFourState));
+      this.connectFourState = applyConnectFourMove(this.connectFourState, move);
+      this.connectFourView?.setRecentMove(move);
+    } catch (err) {
+      console.error('Connect Four engine search failed:', err);
+    } finally {
+      this.isEngineThinking = false;
+      this.updateHUD();
+      this.updateBoard();
+    }
+  }
+
+  // ==========================================
   // Universal Undo & Modals
   // ==========================================
   private handleUndo(): void {
@@ -613,6 +733,14 @@ export class GameSession {
       this.checkersState = this.checkersUndoStack.pop()!;
       this.selectedCheckersSquare = null;
       this.checkersView?.clearVisualFeedback();
+      this.modalContainer.classList.add('hidden');
+      this.updateHUD();
+      this.updateBoard();
+    } else if (this.gameMeta.id === 'connect-four') {
+      if (this.connectFourUndoStack.length === 0) return;
+
+      this.connectFourState = this.connectFourUndoStack.pop()!;
+      this.connectFourView?.clearVisualFeedback();
       this.modalContainer.classList.add('hidden');
       this.updateHUD();
       this.updateBoard();
@@ -662,6 +790,19 @@ export class GameSession {
         modalDesc.textContent = `The engine (${getCheckersColorName(
           getCheckersOpponent(this.humanPlayer)
         )}) won this match.`;
+      }
+    } else if (this.gameMeta.id === 'connect-four') {
+      if (this.connectFourState.winner === 'draw') {
+        modalTitle.textContent = 'Game Draw!';
+        modalDesc.textContent = 'The board is completely full with no 4-in-a-row.';
+      } else if (this.connectFourState.winner === this.humanPlayer) {
+        modalTitle.textContent = 'Victory!';
+        modalDesc.textContent = 'Congratulations! You connected four discs in a row!';
+      } else {
+        modalTitle.textContent = 'Defeat';
+        modalDesc.textContent = `The engine (${getConnectFourColorName(
+          getConnectFourOpponent(this.humanPlayer)
+        )}) connected four discs.`;
       }
     }
 

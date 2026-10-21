@@ -150,6 +150,55 @@ describe('GameSession Universal Controller (TASK-207)', () => {
     expect(haloAfter).toBeNull();
   });
 
+  it('initializes and handles human column drop and undo in Connect Four session', async () => {
+    const c4Meta = GAME_REGISTRY.find((g) => g.id === 'connect-four')!;
+    const session = new GameSession(container, c4Meta, {
+      onReturnToLobby: () => {
+        returnedToLobby = true;
+      },
+    });
+
+    session.start();
+
+    const titleEl = container.querySelector('.hud-game-title');
+    expect(titleEl?.textContent).toBe('Connect Four');
+
+    const c4Svg = container.querySelector('svg.connect-four-board-svg');
+    expect(c4Svg).not.toBeNull();
+    expect(c4Svg?.getAttribute('aria-label')).toBe('Connect Four Game Board');
+
+    // Color dropdown should have Red (1st) and Yellow (2nd)
+    const selectColor = container.querySelector<HTMLSelectElement>('#select-color');
+    expect(selectColor).not.toBeNull();
+    const options = Array.from(selectColor?.querySelectorAll('option') ?? []).map((o) => o.textContent?.trim());
+    expect(options).toEqual(['Red (1st)', 'Yellow (2nd)']);
+
+    // Click column 3 to drop a disc
+    const col3 = container.querySelector<SVGGElement>('g[data-column="3"]');
+    expect(col3).not.toBeNull();
+    col3?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    // A Red disc should now exist at col 3, row 0
+    const redDiscs = container.querySelectorAll('.c4-disc.disc-red');
+    expect(redDiscs.length).toBe(1);
+
+    // Recent move ring should be present
+    const recentRing = container.querySelector('circle.recent-move-to');
+    expect(recentRing).not.toBeNull();
+
+    // Undo button should be enabled
+    const btnUndo = container.querySelector<HTMLButtonElement>('#btn-undo');
+    expect(btnUndo?.disabled).toBe(false);
+
+    // Click Undo
+    btnUndo?.click();
+
+    // Red disc should be removed
+    const redDiscsAfter = container.querySelectorAll('.c4-disc.disc-red');
+    expect(redDiscsAfter.length).toBe(0);
+  });
+
   it('triggers onReturnToLobby when clicking the Back to Menu button', () => {
     const checkersMeta = GAME_REGISTRY.find((g) => g.id === 'checkers')!;
     const session = new GameSession(container, checkersMeta, {

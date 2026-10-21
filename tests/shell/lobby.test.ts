@@ -55,7 +55,7 @@ describe('LobbyView Overview Page', () => {
     lobby.render();
 
     const playBtns = container.querySelectorAll<HTMLButtonElement>('.btn-play-game:not(.disabled)');
-    expect(playBtns.length).toBe(2); // Morris and Checkers
+    expect(playBtns.length).toBe(3); // Morris, Checkers, and Connect Four
 
     // Test Morris button
     playBtns[0].click();
@@ -64,6 +64,10 @@ describe('LobbyView Overview Page', () => {
     // Test Checkers button
     playBtns[1].click();
     expect(selectedGameId).toBe('checkers');
+
+    // Test Connect Four button
+    playBtns[2].click();
+    expect(selectedGameId).toBe('connect-four');
   });
 
   it('disables play buttons for games in scaffolding or planning', () => {
