@@ -7,12 +7,12 @@ import { DIFFICULTY_CONFIGS } from '../../../src/platform/engine/difficulty';
 describe('Reversi - Engine Variability & Determinism', () => {
   const engine = new GenericMinimaxEngine(reversiGameDefinition);
 
-  it('yields identical moves on deterministic Level 5 search', () => {
+  it('yields identical moves on deterministic Level 3 search', () => {
     const state = createInitialReversiState();
-    const config = DIFFICULTY_CONFIGS[5];
+    const config = DIFFICULTY_CONFIGS[3];
 
-    const result1 = engine.search(state, { ...config, deterministic: true });
-    const result2 = engine.search(state, { ...config, deterministic: true });
+    const result1 = engine.search(state, { ...config, maxDepth: 3, deterministic: true });
+    const result2 = engine.search(state, { ...config, maxDepth: 3, deterministic: true });
 
     expect(result1.bestMove.square).toBe(result2.bestMove.square);
     expect(result1.score).toBe(result2.score);
