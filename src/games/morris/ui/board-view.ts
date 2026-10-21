@@ -305,17 +305,27 @@ export class BoardView {
         pieceCircle.setAttribute('class', `piece piece-${piece === 1 ? 'white' : 'black'}`);
         g.appendChild(pieceCircle);
 
-        // Inner ridge for dark pieces to enhance tactile depth and contrast
+        // Inner ridges for dark pieces to enhance tactile depth and contrast
         if (piece === 2) {
-          const innerRidge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          innerRidge.setAttribute('cx', String(coord.x));
-          innerRidge.setAttribute('cy', String(coord.y));
-          innerRidge.setAttribute('r', '13');
-          innerRidge.setAttribute('fill', 'none');
-          innerRidge.setAttribute('stroke', '#94a3b8');
-          innerRidge.setAttribute('stroke-width', '1.2');
-          innerRidge.setAttribute('pointer-events', 'none');
-          g.appendChild(innerRidge);
+          const innerRidge1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerRidge1.setAttribute('cx', String(coord.x));
+          innerRidge1.setAttribute('cy', String(coord.y));
+          innerRidge1.setAttribute('r', '13');
+          innerRidge1.setAttribute('fill', 'none');
+          innerRidge1.setAttribute('stroke', '#94a3b8');
+          innerRidge1.setAttribute('stroke-width', '1.5');
+          innerRidge1.setAttribute('pointer-events', 'none');
+          g.appendChild(innerRidge1);
+
+          const innerRidge2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerRidge2.setAttribute('cx', String(coord.x));
+          innerRidge2.setAttribute('cy', String(coord.y));
+          innerRidge2.setAttribute('r', '7');
+          innerRidge2.setAttribute('fill', 'none');
+          innerRidge2.setAttribute('stroke', '#64748b');
+          innerRidge2.setAttribute('stroke-width', '1.2');
+          innerRidge2.setAttribute('pointer-events', 'none');
+          g.appendChild(innerRidge2);
         }
       }
 

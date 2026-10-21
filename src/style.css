@@ -477,16 +477,17 @@ body {
 }
 
 .piece {
-  stroke-width: 1.5px;
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
 .piece-white {
   stroke: #cbd5e1;
+  stroke-width: 2px;
 }
 
 .piece-black {
   stroke: #cbd5e1;
+  stroke-width: 2.5px;
 }
 
 .checkers-piece.piece-black circle:first-child {
