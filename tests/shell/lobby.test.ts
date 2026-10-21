@@ -54,13 +54,16 @@ describe('LobbyView Overview Page', () => {
   it('triggers onSelectGame when clicking an enabled Play Game button', () => {
     lobby.render();
 
-    const playBtn = container.querySelector<HTMLButtonElement>('.btn-play-game:not(.disabled)');
-    expect(playBtn).not.toBeNull();
-    const gameId = playBtn?.getAttribute('data-game-id');
-    expect(gameId).toBe('nine-mens-morris');
+    const playBtns = container.querySelectorAll<HTMLButtonElement>('.btn-play-game:not(.disabled)');
+    expect(playBtns.length).toBe(2); // Morris and Checkers
 
-    playBtn?.click();
+    // Test Morris button
+    playBtns[0].click();
     expect(selectedGameId).toBe('nine-mens-morris');
+
+    // Test Checkers button
+    playBtns[1].click();
+    expect(selectedGameId).toBe('checkers');
   });
 
   it('disables play buttons for games in scaffolding or planning', () => {

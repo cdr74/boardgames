@@ -23,8 +23,12 @@ export class HudView {
     currentDifficulty: DifficultyLevel,
     playerColor: Player,
     canUndo: boolean,
-    statusMessage: string
+    statusMessage: string,
+    playerLabels?: { player1: string; player2: string }
   ): void {
+    const p1Label = playerLabels?.player1 ?? 'White (1st)';
+    const p2Label = playerLabels?.player2 ?? 'Black (2nd)';
+
     this.container.innerHTML = `
       <div class="hud-bar">
         <div class="hud-left">
@@ -42,8 +46,8 @@ export class HudView {
           <div class="control-group">
             <label for="select-color">You play:</label>
             <select id="select-color" class="hud-select">
-              <option value="1" ${playerColor === 1 ? 'selected' : ''}>White (1st)</option>
-              <option value="2" ${playerColor === 2 ? 'selected' : ''}>Black (2nd)</option>
+              <option value="1" ${playerColor === 1 ? 'selected' : ''}>${p1Label}</option>
+              <option value="2" ${playerColor === 2 ? 'selected' : ''}>${p2Label}</option>
             </select>
           </div>
 

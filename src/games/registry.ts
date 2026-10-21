@@ -26,9 +26,8 @@ export const GAME_REGISTRY: GameMetadata[] = [
     name: 'English Checkers',
     subtitle: 'Draughts • 8x8 Board',
     description: 'Diagonal jumping game. Mandatory captures, multi-jumps, and king crowning on the opponent back rank.',
-    status: 'in-development',
+    status: 'playable',
     definition: checkersGameDefinition,
-    badgeText: 'Next Up (Milestone 2)',
   },
   {
     id: 'connect-four',
