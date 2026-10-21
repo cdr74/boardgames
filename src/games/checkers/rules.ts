@@ -21,13 +21,7 @@ import {
 } from './constants';
 import { CheckersMove, CheckersState, EMPTY, PieceValue, SquareIndex } from './types';
 
-export function getLegalMoves(state: CheckersState): CheckersMove[] {
-  if (state.winner !== null) {
-    return [];
-  }
-
-  const player = state.turn;
-  const board = state.board;
+export function getLegalMovesForPlayer(board: PieceValue[], player: Player): CheckersMove[] {
   const jumpMoves: CheckersMove[] = [];
 
   // Step 1: Scan for all jump moves
@@ -70,6 +64,13 @@ export function getLegalMoves(state: CheckersState): CheckersMove[] {
   }
 
   return simpleMoves;
+}
+
+export function getLegalMoves(state: CheckersState): CheckersMove[] {
+  if (state.winner !== null) {
+    return [];
+  }
+  return getLegalMovesForPlayer(state.board, state.turn);
 }
 
 function getAllowedDirections(piece: PieceValue, player: Player): readonly Direction[] {

@@ -1,3 +1,4 @@
+import { checkersGameDefinition } from './checkers';
 import { morrisGameDefinition } from './morris';
 import { IGameDefinition } from '../platform/types';
 
@@ -26,6 +27,7 @@ export const GAME_REGISTRY: GameMetadata[] = [
     subtitle: 'Draughts • 8x8 Board',
     description: 'Diagonal jumping game. Mandatory captures, multi-jumps, and king crowning on the opponent back rank.',
     status: 'in-development',
+    definition: checkersGameDefinition,
     badgeText: 'Next Up (Milestone 2)',
   },
   {

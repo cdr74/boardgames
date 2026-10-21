@@ -1,3 +1,4 @@
+import { checkersGameDefinition } from '../../games/checkers';
 import { morrisGameDefinition } from '../../games/morris';
 import { GenericMinimaxEngine } from '../engine/minimax';
 import { EngineSearchOptions, IGameDefinition } from '../types';
@@ -10,6 +11,8 @@ function getEngine(gameId: string): GenericMinimaxEngine<any, any> {
     let definition: IGameDefinition<any, any>;
     if (gameId === 'nine-mens-morris') {
       definition = morrisGameDefinition;
+    } else if (gameId === 'checkers') {
+      definition = checkersGameDefinition;
     } else {
       throw new Error(`Unknown game: ${gameId}`);
     }

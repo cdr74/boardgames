@@ -33,8 +33,8 @@ Goal: Implement standard 8x8 English Checkers (Draughts) with diagonal sliding, 
 - [x] **TASK-201:** Architecture Decision Record & Rules Specification (Ref: `docs/adr/0007-english-checkers-rules-and-heuristics.md`).
 - [x] **TASK-202:** Implement board representation (8x8 grid, 32 playable dark squares) and piece state in `src/games/checkers/board.ts` and `src/games/checkers/types.ts`.
 - [x] **TASK-203:** Implement move generator in `src/games/checkers/rules.ts` (diagonal steps, mandatory jumps, multi-jump continuations, king crowning).
-- [ ] **TASK-204:** Implement heuristic evaluator in `src/games/checkers/evaluator.ts` (material values, center control, back-row defense, mobility).
-- [ ] **TASK-205:** Implement `CheckersGameDefinition` conforming to `IGameDefinition<CheckersState, CheckersMove>` and register in worker (`src/platform/worker/worker.ts`).
+- [x] **TASK-204:** Implement heuristic evaluator in `src/games/checkers/evaluator.ts` (material values, center control, back-row defense, mobility).
+- [x] **TASK-205:** Implement `CheckersGameDefinition` conforming to `IGameDefinition<CheckersState, CheckersMove>` and register in worker (`src/platform/worker/worker.ts`).
 - [ ] **TASK-206:** Implement responsive 8x8 SVG board renderer (`src/games/checkers/ui/board-view.ts`) with touch hitboxes and jump-path highlights.
 - [ ] **TASK-207:** Register Checkers in startup Game Lobby menu list (`src/games/registry.ts`) and integrate with universal session (`src/shell/session.ts`).
 - [ ] **TASK-208:** Automated unit, engine, and variability tests in `tests/games/checkers/`.
