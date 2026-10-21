@@ -33,6 +33,22 @@ describe('LobbyView Overview Page', () => {
     }
   });
 
+  it('renders a streamlined header without confusing offline badges or technical footer', () => {
+    lobby.render();
+
+    // Verify offline badge is removed
+    const badge = container.querySelector('.lobby-badge');
+    expect(badge).toBeNull();
+
+    // Verify tech stack footer is removed
+    const footer = container.querySelector('.lobby-footer');
+    expect(footer).toBeNull();
+
+    // Verify user-friendly subtitle
+    const subtitle = container.querySelector('.lobby-subtitle');
+    expect(subtitle?.textContent).toBe('Choose a game to play against the computer (Levels 1–5)');
+  });
+
   it('does NOT render small subtitles (.card-subtitle) on game cards', () => {
     lobby.render();
 

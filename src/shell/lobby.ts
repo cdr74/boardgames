@@ -17,22 +17,13 @@ export class LobbyView {
     this.container.innerHTML = `
       <div class="lobby-container">
         <header class="lobby-header">
-          <div class="lobby-badge">Offline • On-Device Engine</div>
           <h1 class="lobby-title">Classic Board Games</h1>
-          <p class="lobby-subtitle">Select a strategy game to play against the deterministic engine (Levels 1–5)</p>
+          <p class="lobby-subtitle">Choose a game to play against the computer (Levels 1–5)</p>
         </header>
 
         <div class="lobby-grid">
           ${GAME_REGISTRY.map((game) => this.renderGameCard(game)).join('')}
         </div>
-
-        <footer class="lobby-footer">
-          <span>Engine: Pure TypeScript Minimax + Alpha-Beta Pruning</span>
-          <span>•</span>
-          <span>Zero Server Calls</span>
-          <span>•</span>
-          <span>Cross-Platform Web & Mobile</span>
-        </footer>
       </div>
     `;
 

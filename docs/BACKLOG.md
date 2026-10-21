@@ -5,9 +5,9 @@ This backlog tracks architectural milestones, game implementations, and session 
 ---
 
 ## 📌 Session Handoff & Active State
-* **Last Completed Milestone:** Milestone 2: Game 2 — English Checkers / Draughts (Ref: ADR-0007, Tasks TASK-201..208)
-* **Active Working Tree:** Milestone 3 In Progress (Connect Four Rules & Bitboards locked in ADR-0008)
-* **Immediate Next Focus:** Milestone 3: Game 3 — Connect Four (Tasks TASK-302 to TASK-306)
+* **Last Completed Milestone:** Milestone 4: Game 4 — Reversi / Othello (Ref: ADR-0009, Tasks TASK-401..409, Release v0.3.1)
+* **Active Working Tree:** Post-M4 UX Polish & Device Validation complete (Pacing, Game Over Modal 1.2s Delay, Review Board action, Lobby streamling)
+* **Immediate Next Focus:** Milestone 5: Audio Synthesizer, Haptics & Accessibility (Tasks TASK-501 to TASK-504)
 
 ---
 
@@ -62,6 +62,9 @@ Goal: Implement 8x8 territory flanking and disc-flipping strategy game.
 - [x] **TASK-404:** Implement `ReversiGameDefinition`.
 - [x] **TASK-405:** Implement responsive 8x8 felt SVG board with legal flip previews.
 - [x] **TASK-406:** Register Reversi in Game Lobby menu list and create automated test suite.
+- [x] **TASK-407:** Calibrate move pacing: increase engine delay to 600ms in Connect Four and 650ms in Reversi, with a 500ms pause for consecutive AI passes (`src/shell/session.ts`).
+- [x] **TASK-408:** Implement 1.2s Game Over modal delay to preserve winning line and flipped disc visibility, plus a "Review Board" modal action to dismiss the overlay (`src/shell/session.ts`, `src/style.css`, `tests/shell/session.test.ts`).
+- [x] **TASK-409:** Streamline Game Lobby header/footer: remove confusing "Offline • On-Device Engine" badge and developer tech stack footer, simplify subtitle (`src/shell/lobby.ts`, `src/style.css`, `tests/shell/lobby.test.ts`).
 
 ---
 

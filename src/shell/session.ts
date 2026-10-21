@@ -124,6 +124,8 @@ export class GameSession {
   private reversiState: ReversiState;
   private reversiUndoStack: ReversiState[] = [];
 
+  private gameOverModalTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(container: HTMLElement, gameMeta: GameMetadata, callbacks: SessionCallbacks) {
     this.container = container;
     this.gameMeta = gameMeta;
@@ -146,7 +148,10 @@ export class GameSession {
           <div class="modal-card">
             <h2 id="modal-title" class="modal-title"></h2>
             <p id="modal-desc" class="modal-desc"></p>
-            <button id="btn-modal-restart" class="btn-play-game">Play Again</button>
+            <div class="modal-actions">
+              <button id="btn-modal-restart" class="btn-play-game">Play Again</button>
+              <button id="btn-modal-review" class="btn-secondary">Review Board</button>
+            </div>
           </div>
         </div>
       </div>
@@ -158,6 +163,7 @@ export class GameSession {
 
     this.hudView = new HudView(this.hudContainer, {
       onBackToMenu: () => {
+        this.clearGameOverTimer();
         this.engineClient.terminate();
         this.callbacks.onReturnToLobby();
       },
@@ -193,8 +199,15 @@ export class GameSession {
 
     const btnRestart = this.container.querySelector('#btn-modal-restart');
     btnRestart?.addEventListener('click', () => {
+      this.clearGameOverTimer();
       this.modalContainer.classList.add('hidden');
       this.startNewGame();
+    });
+
+    const btnReview = this.container.querySelector('#btn-modal-review');
+    btnReview?.addEventListener('click', () => {
+      this.clearGameOverTimer();
+      this.modalContainer.classList.add('hidden');
     });
 
     this.startNewGame();
@@ -203,6 +216,7 @@ export class GameSession {
   public async startNewGame(): Promise<void> {
     if (this.isEngineThinking) return;
 
+    this.clearGameOverTimer();
     this.modalContainer.classList.add('hidden');
 
     if (this.gameMeta.id === 'nine-mens-morris') {
@@ -345,25 +359,25 @@ export class GameSession {
       if (!this.morrisView) return;
       this.morrisView.render(this.morrisState);
       if (this.morrisState.winner !== null) {
-        this.showGameOverModal();
+        this.scheduleGameOverModal(1200);
       }
     } else if (this.gameMeta.id === 'checkers') {
       if (!this.checkersView) return;
       this.checkersView.render(this.checkersState);
       if (this.checkersState.winner !== null) {
-        this.showGameOverModal();
+        this.scheduleGameOverModal(1200);
       }
     } else if (this.gameMeta.id === 'connect-four') {
       if (!this.connectFourView) return;
       this.connectFourView.render(this.connectFourState);
       if (this.connectFourState.winner !== null) {
-        this.showGameOverModal();
+        this.scheduleGameOverModal(1200);
       }
     } else if (this.gameMeta.id === 'reversi') {
       if (!this.reversiView) return;
       this.reversiView.render(this.reversiState);
       if (this.reversiState.winner !== null) {
-        this.showGameOverModal();
+        this.scheduleGameOverModal(1200);
       }
     }
   }
@@ -746,7 +760,7 @@ export class GameSession {
 
       const [searchResult] = await Promise.all([
         searchPromise,
-        new Promise((resolve) => setTimeout(resolve, 350)),
+        new Promise((resolve) => setTimeout(resolve, 600)),
       ]);
 
       const move = searchResult.bestMove;
@@ -787,10 +801,16 @@ export class GameSession {
 
   private async triggerReversiEngineMove(): Promise<void> {
     // Reversi can have consecutive turns for a player due to passes
+    let consecutiveMoves = 0;
     while (
       this.reversiState.winner === null &&
       this.reversiState.turn !== this.humanPlayer
     ) {
+      if (consecutiveMoves > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      consecutiveMoves++;
+
       this.isEngineThinking = true;
       this.updateHUD();
 
@@ -805,7 +825,7 @@ export class GameSession {
 
         const [searchResult] = await Promise.all([
           searchPromise,
-          new Promise((resolve) => setTimeout(resolve, 350)),
+          new Promise((resolve) => setTimeout(resolve, 650)),
         ]);
 
         const move = searchResult.bestMove;
@@ -828,6 +848,8 @@ export class GameSession {
   // ==========================================
   private handleUndo(): void {
     if (this.isEngineThinking) return;
+
+    this.clearGameOverTimer();
 
     if (this.gameMeta.id === 'nine-mens-morris') {
       if (this.morrisState.pendingCapture && this.stateBeforeCapture) {
@@ -878,6 +900,21 @@ export class GameSession {
       this.updateHUD();
       this.updateBoard();
     }
+  }
+
+  private clearGameOverTimer(): void {
+    if (this.gameOverModalTimer !== null) {
+      clearTimeout(this.gameOverModalTimer);
+      this.gameOverModalTimer = null;
+    }
+  }
+
+  private scheduleGameOverModal(delayMs = 1200): void {
+    this.clearGameOverTimer();
+    this.gameOverModalTimer = setTimeout(() => {
+      this.showGameOverModal();
+      this.gameOverModalTimer = null;
+    }, delayMs);
   }
 
   private showGameOverModal(): void {

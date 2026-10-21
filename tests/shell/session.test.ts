@@ -271,4 +271,123 @@ describe('GameSession Universal Controller (TASK-207)', () => {
 
     expect(returnedToLobby).toBe(true);
   });
+
+  it('delays game over modal by 1.2s and allows reviewing the final board', () => {
+    vi.useFakeTimers();
+    try {
+      const c4Meta = GAME_REGISTRY.find((g) => g.id === 'connect-four')!;
+      const session = new GameSession(container, c4Meta, {
+        onReturnToLobby: () => {},
+      });
+
+      session.start();
+
+      const modalOverlay = container.querySelector<HTMLDivElement>('#session-modal')!;
+      const sessionAny = session as any;
+
+      // Simulate match ending with human victory
+      sessionAny.connectFourState.winner = 1;
+      sessionAny.connectFourState.winReason = 'connect4';
+      sessionAny.updateBoard();
+
+      // Immediately after win, modal MUST be hidden so user sees the winning alignment
+      expect(modalOverlay.classList.contains('hidden')).toBe(true);
+
+      // Advance by 600ms: still hidden
+      vi.advanceTimersByTime(600);
+      expect(modalOverlay.classList.contains('hidden')).toBe(true);
+
+      // Advance remaining 600ms (total 1200ms): modal should now be visible
+      vi.advanceTimersByTime(600);
+      expect(modalOverlay.classList.contains('hidden')).toBe(false);
+
+      const titleEl = container.querySelector('#modal-title');
+      expect(titleEl?.textContent).toBe('Victory!');
+
+      // Click "Review Board" button
+      const btnReview = container.querySelector<HTMLButtonElement>('#btn-modal-review')!;
+      expect(btnReview).not.toBeNull();
+      btnReview.click();
+
+      // Modal should be dismissed so user can inspect the final board at leisure
+      expect(modalOverlay.classList.contains('hidden')).toBe(true);
+
+      // Board is still intact
+      const boardSvg = container.querySelector('svg.connect-four-board-svg');
+      expect(boardSvg).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('allows restarting a new match from the game over modal', () => {
+    vi.useFakeTimers();
+    try {
+      const reversiMeta = GAME_REGISTRY.find((g) => g.id === 'reversi')!;
+      const session = new GameSession(container, reversiMeta, {
+        onReturnToLobby: () => {},
+      });
+
+      session.start();
+
+      const modalOverlay = container.querySelector<HTMLDivElement>('#session-modal')!;
+      const sessionAny = session as any;
+
+      // Simulate defeat
+      sessionAny.reversiState.winner = 2;
+      sessionAny.reversiState.winReason = 'discs';
+      sessionAny.reversiState.blackCount = 20;
+      sessionAny.reversiState.whiteCount = 44;
+      sessionAny.updateBoard();
+
+      vi.advanceTimersByTime(1200);
+      expect(modalOverlay.classList.contains('hidden')).toBe(false);
+
+      const titleEl = container.querySelector('#modal-title');
+      expect(titleEl?.textContent).toBe('Defeat');
+
+      // Click "Play Again"
+      const btnRestart = container.querySelector<HTMLButtonElement>('#btn-modal-restart')!;
+      btnRestart.click();
+
+      // Modal is hidden and fresh state is initialized
+      expect(modalOverlay.classList.contains('hidden')).toBe(true);
+      expect(sessionAny.reversiState.winner).toBeNull();
+      expect(sessionAny.reversiState.blackCount).toBe(2);
+      expect(sessionAny.reversiState.whiteCount).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cancels scheduled game over modal if user restarts before timer fires', () => {
+    vi.useFakeTimers();
+    try {
+      const morrisMeta = GAME_REGISTRY.find((g) => g.id === 'nine-mens-morris')!;
+      const session = new GameSession(container, morrisMeta, {
+        onReturnToLobby: () => {},
+      });
+
+      session.start();
+
+      const modalOverlay = container.querySelector<HTMLDivElement>('#session-modal')!;
+      const sessionAny = session as any;
+
+      // Trigger game over
+      sessionAny.morrisState.winner = 1;
+      sessionAny.updateBoard();
+
+      // Before timer fires (e.g. 500ms), user starts a new game
+      vi.advanceTimersByTime(500);
+      session.startNewGame();
+
+      // Advance past remaining time
+      vi.advanceTimersByTime(1000);
+
+      // Modal should NOT be shown
+      expect(modalOverlay.classList.contains('hidden')).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
