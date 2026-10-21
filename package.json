@@ -1,6 +1,6 @@
 {
   "name": "boardgames",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Cross-platform multi-game boardgame suite featuring on-device deterministic game engine.",
   "repository": {
