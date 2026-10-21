@@ -6,8 +6,8 @@ This backlog tracks architectural milestones, game implementations, and session 
 
 ## 📌 Session Handoff & Active State
 * **Last Completed Milestone:** Milestone 2: Game 2 — English Checkers / Draughts (Ref: ADR-0007, Tasks TASK-201..208)
-* **Active Working Tree:** Milestone 2 Complete (Morris & Checkers playable in Lobby)
-* **Immediate Next Focus:** Milestone 3: Game 3 — Connect Four (Tasks TASK-301 to TASK-306)
+* **Active Working Tree:** Milestone 3 In Progress (Connect Four Rules & Bitboards locked in ADR-0008)
+* **Immediate Next Focus:** Milestone 3: Game 3 — Connect Four (Tasks TASK-302 to TASK-306)
 
 ---
 
@@ -41,10 +41,10 @@ Goal: Implement standard 8x8 English Checkers (Draughts) with diagonal sliding, 
 
 ---
 
-## Milestone 3: Game 3 — Connect Four (Status: ⚪ Planned)
+## Milestone 3: Game 3 — Connect Four (Status: 🟡 In Progress)
 Goal: Implement classic 7x6 vertical gravity drop alignment game.
 
-- [ ] **TASK-301:** ADR & Rules Specification (Ref: `docs/adr/0006-connect-four-rules-and-bitboards.md`).
+- [x] **TASK-301:** ADR & Rules Specification (Ref: `docs/adr/0008-connect-four-rules-and-bitboards.md`).
 - [ ] **TASK-302:** Implement 7x6 board representation, gravity drop mechanics, and contiguous 4-in-a-row detection.
 - [ ] **TASK-303:** Implement heuristic evaluator (center column priority, open-ended 2- and 3-in-a-row threat weights).
 - [ ] **TASK-304:** Implement `ConnectFourGameDefinition`.
