@@ -13,9 +13,9 @@ A lean, responsive, cross-platform multi-game boardgame suite featuring an on-de
 | Game | Status | Topology | Mechanics | Engine Features |
 | :--- | :---: | :--- | :--- | :--- |
 | **Nine Men's Morris** (*Mühlespiel*) | 🟢 Ready | 24-point 3-square graph | Placement, sliding, flying, 16 mill lines | Alpha-Beta + Zobrist + Epsilon Pooling |
-| **English Checkers** (*Draughts*) | 🟡 In Scaffolding | 8x8 checkerboard (32 dark squares) | Diagonal slides, mandatory jumps, kinging | Alpha-Beta + Forced Jump Priority |
-| **Connect Four** | ⚪ Planned | 7x6 vertical gravity grid | Column drop, 4-in-a-row alignment | Alpha-Beta + Alignment Heuristics |
-| **Reversi** (*Othello*) | ⚪ Planned | 8x8 grid | Flanking ray captures, disc flips | Alpha-Beta + Corner Stability |
+| **English Checkers** (*Draughts*) | 🟢 Ready | 8x8 checkerboard (32 dark squares) | Diagonal slides, mandatory jumps, kinging | Alpha-Beta + Forced Jump Priority |
+| **Connect Four** | 🟢 Ready | 7x6 vertical gravity grid | Column drop, 4-in-a-row alignment | 64-bit Bitboards + Alignment Heuristics |
+| **Reversi** (*Othello*) | 🟢 Ready | 8x8 grid | Flanking ray captures, disc flips | Alpha-Beta + Corner & Frontier Stability |
 
 ---
 
