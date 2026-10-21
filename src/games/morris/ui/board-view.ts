@@ -82,8 +82,9 @@ export class BoardView {
       </radialGradient>
       <radialGradient id="grad-black-piece" cx="35%" cy="35%" r="65%">
         <stop offset="0%" stop-color="#475569"/>
-        <stop offset="70%" stop-color="#1e293b"/>
-        <stop offset="100%" stop-color="#0f172a"/>
+        <stop offset="40%" stop-color="#334155"/>
+        <stop offset="80%" stop-color="#0f172a"/>
+        <stop offset="100%" stop-color="#020617"/>
       </radialGradient>
       <filter id="piece-shadow" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/>
@@ -299,10 +300,23 @@ export class BoardView {
           piece === 1 ? 'url(#grad-white-piece)' : 'url(#grad-black-piece)'
         );
         pieceCircle.setAttribute('filter', 'url(#piece-shadow)');
-        pieceCircle.setAttribute('stroke', piece === 1 ? '#cbd5e1' : '#64748b');
-        pieceCircle.setAttribute('stroke-width', '1.5');
+        pieceCircle.setAttribute('stroke', '#cbd5e1'); // High contrast crisp silver rim for both piece colors
+        pieceCircle.setAttribute('stroke-width', '2.5');
         pieceCircle.setAttribute('class', `piece piece-${piece === 1 ? 'white' : 'black'}`);
         g.appendChild(pieceCircle);
+
+        // Inner ridge for dark pieces to enhance tactile depth and contrast
+        if (piece === 2) {
+          const innerRidge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerRidge.setAttribute('cx', String(coord.x));
+          innerRidge.setAttribute('cy', String(coord.y));
+          innerRidge.setAttribute('r', '13');
+          innerRidge.setAttribute('fill', 'none');
+          innerRidge.setAttribute('stroke', '#94a3b8');
+          innerRidge.setAttribute('stroke-width', '1.2');
+          innerRidge.setAttribute('pointer-events', 'none');
+          g.appendChild(innerRidge);
+        }
       }
 
       // Event listener
